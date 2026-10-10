@@ -1,11 +1,12 @@
-using System.ClientModel;                 // ClientResultException / ApiKeyCredential
 using System.Text;
+using System.ClientModel;                 // ApiKeyCredential
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.AI;
 using OpenAI;
 
 Console.OutputEncoding = Encoding.UTF8;
 
+// 装配：读配置（appsettings 非密 + user-secrets 里的 key），构建一个 IChatClient
 var config = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("appsettings.json", optional: false)
@@ -15,45 +16,25 @@ var baseUrl = config["Qwen:BaseUrl"]!;
 var model = config["Qwen:Model"]!;
 var apiKey = config["Qwen:ApiKey"]!;
 
-// 第六节：异常处理 —— 分层捕获，把失败翻译成可读信息
-static IChatClient BuildClient(string key, string url, string mdl) =>
-    new OpenAIClient(new ApiKeyCredential(key), new OpenAIClientOptions { Endpoint = new Uri(url) })
-        .GetChatClient(mdl).AsIChatClient();
+// 分发：跑哪一节由命令行参数决定
+//   dotnet run -- w4s1   （默认，W4 第一节：多轮对话/无状态）
+//   dotnet run -- w3s6   （回看 W3 第六节：异常处理）
+var target = (args.Length > 0 ? args[0] : "w4s1").ToLowerInvariant();
 
-static async Task SafeCall(string label, Func<Task> call)
+switch (target)
 {
-    Console.WriteLine($"\n--- {label} ---");
-    try
-    {
-        await call();
-        Console.WriteLine("✅ 成功（本不该成功）");
-    }
-    catch (ClientResultException ex)   // OpenAI SDK 把 HTTP 错误包成这个
-    {
-        Console.WriteLine($"❌ ClientResultException | HTTP {ex.Status}");
-        Console.WriteLine($"   消息: {ex.Message}");
-    }
-    catch (HttpRequestException ex)   // 网络层：DNS/连接/超时
-    {
-        Console.WriteLine($"❌ HttpRequestException（网络层）: {ex.Message}");
-    }
-    catch (Exception ex)              // 兜底：别让它裸崩
-    {
-        Console.WriteLine($"❌ {ex.GetType().Name}: {ex.Message}");
-    }
+    case "w3s6":
+        await W3S6_异常处理.Run(baseUrl, model, apiKey);
+        break;
+
+    case "w4s1":
+        IChatClient client = new OpenAIClient(new ApiKeyCredential(apiKey),
+                new OpenAIClientOptions { Endpoint = new Uri(baseUrl) })
+            .GetChatClient(model).AsIChatClient();
+        await W4S1_多轮对话.Run(client);
+        break;
+
+    default:
+        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1");
+        break;
 }
-
-// 故意触发两类错误，观察真实返回
-await SafeCall("错误模型名 qwen-does-not-exist", async () =>
-{
-    var r = await BuildClient(apiKey, baseUrl, "qwen-does-not-exist")
-        .GetResponseAsync(new ChatMessage(ChatRole.User, "hi"));
-    Console.WriteLine(r.Text);
-});
-
-await SafeCall("错误 API key", async () =>
-{
-    var r = await BuildClient("sk-this-key-is-invalid", baseUrl, model)
-        .GetResponseAsync(new ChatMessage(ChatRole.User, "hi"));
-    Console.WriteLine(r.Text);
-});
