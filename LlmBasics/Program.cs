@@ -16,12 +16,12 @@ var baseUrl = config["Qwen:BaseUrl"]!;
 var model = config["Qwen:Model"]!;
 var apiKey = config["Qwen:ApiKey"]!;
 
-// 分发：跑哪一节由命令行参数决定
-//   dotnet run -- w4s1                （默认，W4 第一节：多轮对话/无状态）
-//   dotnet run -- w4s2                （W4 第二节：流式输出 SSE，用 appsettings 里的模型）
-//   dotnet run -- w4s2 qwen3.8-flash  （第二个参数=临时覆盖模型，方便跨模型对比）
-//   dotnet run -- w3s6                （回看 W3 第六节：异常处理）
-var target = (args.Length > 0 ? args[0] : "w4s1").ToLowerInvariant();
+// 分发：跑哪一节由命令行参数决定，可选第二个参数临时覆盖模型
+//   dotnet run                    （默认跑最新一节）
+//   dotnet run -- w5s3            （指定节：w3s6 / w4s1..w4s6 / w5s1 / w5s2 / w5s3）
+//   dotnet run -- w4s2 qwen3.8-flash  （第二个参数=临时覆盖模型，跨模型对比）
+// 约定：默认目标始终指向"最新写的那一节"，每加新节就更新下面这行的默认值
+var target = (args.Length > 0 ? args[0] : "w5s3").ToLowerInvariant();
 if (args.Length > 1) model = args[1];   // args[1] 存在则覆盖模型
 Console.WriteLine($"[config] 本次使用模型: {model}");
 
@@ -75,7 +75,11 @@ switch (target)
         await W5S2_脏数据兜底.Run(client);
         break;
 
+    case "w5s3":
+        await W5S3_函数调用.Run(client);
+        break;
+
     default:
-        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1..w4s6, w5s1, w5s2");
+        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1..w4s6, w5s1, w5s2, w5s3");
         break;
 }
