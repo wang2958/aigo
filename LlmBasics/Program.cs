@@ -21,7 +21,7 @@ var apiKey = config["Qwen:ApiKey"]!;
 //   dotnet run -- w5s3            （指定节：w3s6 / w4s1..w4s6 / w5s1 / w5s2 / w5s3）
 //   dotnet run -- w4s2 qwen3.8-flash  （第二个参数=临时覆盖模型，跨模型对比）
 // 约定：默认目标始终指向"最新写的那一节"，每加新节就更新下面这行的默认值
-var target = (args.Length > 0 ? args[0] : "w6s1").ToLowerInvariant();
+var target = (args.Length > 0 ? args[0] : "w6s2").ToLowerInvariant();
 if (args.Length > 1) model = args[1];   // args[1] 存在则覆盖模型
 Console.WriteLine($"[config] 本次使用模型: {model}");
 
@@ -95,7 +95,11 @@ switch (target)
         await W6S1_嵌入直觉.Run(baseUrl, apiKey, "qwen3.7-text-embedding-flash");
         break;
 
+    case "w6s2":
+        await W6S2_向量结构.Run(baseUrl, apiKey, "qwen3.7-text-embedding-flash");
+        break;
+
     default:
-        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1..w4s6, w5s1..w5s6, w6s1");
+        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1..w4s6, w5s1..w5s6, w6s1, w6s2");
         break;
 }
