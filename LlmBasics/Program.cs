@@ -63,7 +63,11 @@ switch (target)
         await W4S5_聊天程序.Run(baseUrl, apiKey, model);
         break;
 
+    case "w4s6":
+        await W4S6_异常与重试.Run();
+        break;
+
     default:
-        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1, w4s2, w4s2b, w4s2c, w4s3, w4s4, w4s5");
+        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1, w4s2, w4s2b, w4s2c, w4s3, w4s4, w4s5, w4s6");
         break;
 }
