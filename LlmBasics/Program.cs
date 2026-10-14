@@ -55,7 +55,15 @@ switch (target)
         await W4S3_中断与取消.Run(client);
         break;
 
+    case "w4s4":
+        await W4S4_token统计与截断.Run(client);
+        break;
+
+    case "w4s5":
+        await W4S5_聊天程序.Run(baseUrl, apiKey, model);
+        break;
+
     default:
-        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1, w4s2, w4s2b, w4s2c, w4s3");
+        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1, w4s2, w4s2b, w4s2c, w4s3, w4s4, w4s5");
         break;
 }
