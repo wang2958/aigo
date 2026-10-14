@@ -67,7 +67,15 @@ switch (target)
         await W4S6_异常与重试.Run();
         break;
 
+    case "w5s1":
+        await W5S1_严格JSON.Run(client);
+        break;
+
+    case "w5s2":
+        await W5S2_脏数据兜底.Run(client);
+        break;
+
     default:
-        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1, w4s2, w4s2b, w4s2c, w4s3, w4s4, w4s5, w4s6");
+        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1..w4s6, w5s1, w5s2");
         break;
 }
