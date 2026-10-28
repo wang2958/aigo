@@ -6,7 +6,7 @@ using OpenAI;
 
 Console.OutputEncoding = Encoding.UTF8;
 
-var target = (args.Length > 0 ? args[0] : "w6s4").ToLowerInvariant();
+var target = (args.Length > 0 ? args[0] : "w6s5").ToLowerInvariant();
 if (target == "w6s4")
 {
     W6S4_切块器.Run();
@@ -15,6 +15,11 @@ if (target == "w6s4")
 if (target == "w6s4-test")
 {
     W6S4_切块器测试.Run();
+    return;
+}
+if (target == "w6s5-test")
+{
+    W6S5_最近邻搜索测试.Run();
     return;
 }
 
@@ -27,6 +32,14 @@ var config = new ConfigurationBuilder()
 var baseUrl = config["Qwen:BaseUrl"]!;
 var model = config["Qwen:Model"]!;
 var apiKey = config["Qwen:ApiKey"]!;
+
+if (target == "w6s5")
+{
+    if (string.IsNullOrWhiteSpace(apiKey))
+        throw new InvalidOperationException("请先通过 .NET user-secrets 配置 Qwen:ApiKey；本地测试可运行 w6s5-test。");
+    await W6S5_最近邻搜索.Run(baseUrl, apiKey, "qwen3.7-text-embedding-flash");
+    return;
+}
 
 // 分发：跑哪一节由命令行参数决定，可选第二个参数临时覆盖模型
 //   dotnet run                    （默认跑最新一节）
@@ -110,6 +123,6 @@ switch (target)
         break;
 
     default:
-        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1..w4s6, w5s1..w5s6, w6s1, w6s2, w6s4, w6s4-test");
+        Console.WriteLine($"未知目标 '{target}'。可用: w3s6, w4s1..w4s6, w5s1..w5s6, w6s1, w6s2, w6s4, w6s4-test, w6s5, w6s5-test");
         break;
 }
