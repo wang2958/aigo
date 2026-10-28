@@ -12,11 +12,6 @@ if (target == "w6s4")
     W6S4_切块器.Run();
     return;
 }
-if (target == "w6s4-test")
-{
-    W6S4_切块器测试.Run();
-    return;
-}
 if (target == "w6s5-test")
 {
     W6S5_最近邻搜索测试.Run();
